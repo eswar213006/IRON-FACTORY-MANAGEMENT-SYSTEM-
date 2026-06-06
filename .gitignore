@@ -5,10 +5,6 @@ node_modules/
 .env
 .env.local
 
-# Data files (runtime database - keep structure but not live data)
-data/users.json
-data/sales.json
-
 # Logs
 *.log
 logs/

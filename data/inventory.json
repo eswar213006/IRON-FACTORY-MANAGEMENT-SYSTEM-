@@ -1,1 +1,42 @@
-[]
+[
+    {
+        "sku": "UQ001",
+        "name": "Iron Ore Pellets",
+        "quantity": 2500,
+        "size": "10mm",
+        "sell": 8500,
+        "category": "Raw Material",
+        "location": "Raw Material Yard",
+        "minStock": 500
+    },
+    {
+        "sku": "UQ002",
+        "name": "Steel Rebars (TMT)",
+        "quantity": 1200,
+        "size": "12mm",
+        "sell": 58000,
+        "category": "Finished Product",
+        "location": "Finished Goods Hub",
+        "minStock": 200
+    },
+    {
+        "sku": "UQ003",
+        "name": "Cast Iron Pipes",
+        "quantity": 800,
+        "size": "150mm",
+        "sell": 65000,
+        "category": "Finished Product",
+        "location": "Finished Goods Hub",
+        "minStock": 150
+    },
+    {
+        "sku": "UQ004",
+        "name": "Coal Coke Fuel",
+        "quantity": 1800,
+        "size": "Medium-Lump",
+        "sell": 12000,
+        "category": "Raw Material",
+        "location": "Blast Furnace Yard",
+        "minStock": 400
+    }
+]
