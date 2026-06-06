@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FerrumForge Iron Logistics Manager</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- ApexCharts for modern, interactive dashboard visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Fullscreen Auth Screen -->
+    <div id="auth-view" class="auth-container">
+        <div class="auth-card glass-panel">
+            <div class="auth-header">
+                <i data-lucide="anvil" class="auth-logo-icon"></i>
+                <h1>FerrumForge Industrial</h1>
+                <p class="subtitle">Iron Foundry Logistics Control System</p>
+            </div>
+
+            <!-- Toggle Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="tab-login-btn">Sign In</button>
+                <button class="auth-tab-btn" id="tab-register-btn">Register Worker</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active">
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="login-username" placeholder="Enter username" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="login-password" placeholder="Enter password" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">
+                    <i data-lucide="log-in"></i>
+                    <span>Access Console</span>
+                </button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form">
+                <div class="form-group">
+                    <label for="reg-name">Full Name</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="info"></i>
+                        <input type="text" id="reg-name" placeholder="Worker full name" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-email">Corporate Email</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="mail"></i>
+                        <input type="email" id="reg-email" placeholder="worker@ferrumforge.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-username">Choose Username</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="user"></i>
+                        <input type="text" id="reg-username" placeholder="e.g. jsmith" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-password">Password</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="reg-password" placeholder="Min 6 characters" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="reg-role">Assigned System Role</label>
+                    <div class="select-wrapper">
+                        <select id="reg-role" required>
+                            <option value="Yard Operator" selected>Yard Operator (Restricted Worker)</option>
+                            <option value="Admin">Plant Controller (Admin)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group hidden" id="admin-key-group">
+                    <label for="reg-admin-key">Admin Authorization Key</label>
+                    <div class="input-icon-wrapper">
+                        <i data-lucide="key-round"></i>
+                        <input type="password" id="reg-admin-key" placeholder="Enter key (FORGE2026)">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-secondary btn-full">
+                    <i data-lucide="user-plus"></i>
+                    <span>Register Account</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container hidden" id="app-view">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <i data-lucide="anvil" class="logo-icon"></i>
+                    <span class="logo-text">FerrumForge</span>
+                </div>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-tab="dashboard" id="nav-dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="inventory" id="nav-inventory">
+                    <i data-lucide="boxes"></i>
+                    <span>Material Inventory</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="operations" id="nav-operations">
+                    <i data-lucide="arrow-left-right"></i>
+                    <span>Mill Operations</span>
+                </a>
+                <a href="#" class="menu-item" data-tab="reports" id="nav-reports">
+                    <i data-lucide="bar-chart-3"></i>
+                    <span>Audits & Reports</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="avatar">
+                        <i data-lucide="shield-alert" class="avatar-icon" id="sidebar-role-icon"></i>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name" id="sidebar-user-name">Forge Master</span>
+                        <span class="user-role" id="sidebar-user-role">Plant Controller</span>
+                    </div>
+                </div>
+                <button class="logout-btn" id="logout-btn" title="Sign Out of Console">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-search">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="global-search" placeholder="Search Materials, Billets, SKUs...">
+                </div>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="theme-toggle-btn" title="Toggle Industrial Theme">
+                        <i data-lucide="sun" class="sun-icon"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+                    <div class="notification-bell" id="notification-trigger">
+                        <i data-lucide="bell"></i>
+                        <span class="badge" id="low-stock-badge">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Views (Tabs) -->
+            <div class="content-body">
+                
+                <!-- VIEW 1: DASHBOARD -->
+                <section class="tab-content active" id="view-dashboard">
+                    <div class="welcome-header">
+                        <h1>FerrumForge Yard Status</h1>
+                        <p class="subtitle">Real-time supervision of smelting charges, stockpiles, and mill outbounds</p>
+                    </div>
+
+                    <!-- KPI Grid -->
+                    <div class="kpi-grid">
+                        <div class="kpi-card" id="kpi-total-items">
+                            <div class="kpi-icon-wrapper blue">
+                                <i data-lucide="database"></i>
+                            </div>
+                            <div class="kpi-data">
+                                <h3>Total Material Stock</h3>
+                                <p class="kpi-value" id="kpi-total-items-val">0</p>
+                                <span class="kpi-trend positive">Metric Tons (t)</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" id="kpi-total-value">
+                            <div class="kpi-icon-wrapper green">
+                                <i data-lucide="indian-rupee"></i>
+                            </div>
+                            <div class="kpi-data">
+                                <h3>Asset Capital Value</h3>
+                                <p class="kpi-value" id="kpi-total-value-val">₹0.00</p>
+                                <span class="kpi-trend text-muted">Stock value</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card" id="kpi-sales">
+                            <div class="kpi-icon-wrapper purple">
+                                <i data-lucide="truck"></i>
+                            </div>
+                            <div class="kpi-data">
+                                <h3>Total Material Dispatched</h3>
+                                <p class="kpi-value" id="kpi-sales-val">₹0.00</p>
+                                <span class="kpi-trend positive" id="kpi-sales-count">0 shipments</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card alert-state" id="kpi-low-stock">
+                            <div class="kpi-icon-wrapper red">
+                                <i data-lucide="flame"></i>
+                            </div>
+                            <div class="kpi-data">
+                                <h3>Smelter Threshold Alerts</h3>
+                                <p class="kpi-value" id="kpi-low-stock-val">0</p>
+                                <span class="kpi-trend negative" id="kpi-low-stock-subtitle">Requires replenishment</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Section -->
+                    <div class="dashboard-charts-grid">
+                        <div class="chart-container glass-panel">
+                            <div class="panel-header">
+                                <h2>Material Weight Distribution</h2>
+                            </div>
+                            <div class="panel-body">
+                                <div id="category-donut-chart"></div>
+                            </div>
+                        </div>
+                        <div class="chart-container glass-panel">
+                            <div class="panel-header">
+                                <h2>Stockyard Allocations</h2>
+                            </div>
+                            <div class="panel-body">
+                                <div id="warehouse-bar-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warehouses Detail Cards -->
+                    <div class="section-title">
+                        <h2>Factory Stockyards & Areas</h2>
+                    </div>
+                    <div class="warehouse-grid">
+                        <div class="warehouse-card glass-panel" data-loc="Raw Material Yard">
+                            <div class="wh-header">
+                                <h3>Raw Material Yard</h3>
+                                <span class="wh-status badge success">Adequate</span>
+                            </div>
+                            <p class="wh-description">Ore stockpiles, coke bins, limestone, and coal yards.</p>
+                            <div class="wh-progress-container">
+                                <div class="wh-progress-header">
+                                    <span>Yard Capacity Utilization</span>
+                                    <span class="wh-percentage" id="wh-A-capacity">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill wh-A-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="wh-stats">
+                                <div><span class="stat-num" id="wh-A-items">0</span> <span class="stat-lbl">SKUs</span></div>
+                                <div><span class="stat-num" id="wh-A-stock">0</span> <span class="stat-lbl">Tons</span></div>
+                            </div>
+                        </div>
+
+                        <div class="warehouse-card glass-panel" data-loc="Finished Goods Hub">
+                            <div class="wh-header">
+                                <h3>Finished Goods Hub</h3>
+                                <span class="wh-status badge success">Optimal</span>
+                            </div>
+                            <p class="wh-description">Rolls of coils, bundled rebar structures, and wire rods.</p>
+                            <div class="wh-progress-container">
+                                <div class="wh-progress-header">
+                                    <span>Hub Capacity Utilization</span>
+                                    <span class="wh-percentage" id="wh-B-capacity">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill wh-B-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="wh-stats">
+                                <div><span class="stat-num" id="wh-B-items">0</span> <span class="stat-lbl">SKUs</span></div>
+                                <div><span class="stat-num" id="wh-B-stock">0</span> <span class="stat-lbl">Tons</span></div>
+                            </div>
+                        </div>
+
+                        <div class="warehouse-card glass-panel" data-loc="Blast Furnace Yard">
+                            <div class="wh-header">
+                                <h3>Blast Furnace Yard</h3>
+                                <span class="wh-status badge warning">Critical Low</span>
+                            </div>
+                            <p class="wh-description">Direct smelting ingredients stockpile ready for furnace loading.</p>
+                            <div class="wh-progress-container">
+                                <div class="wh-progress-header">
+                                    <span>Yard Capacity Utilization</span>
+                                    <span class="wh-percentage" id="wh-S1-capacity">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill wh-S1-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="wh-stats">
+                                <div><span class="stat-num" id="wh-S1-items">0</span> <span class="stat-lbl">SKUs</span></div>
+                                <div><span class="stat-num" id="wh-S1-stock">0</span> <span class="stat-lbl">Tons</span></div>
+                            </div>
+                        </div>
+
+                        <div class="warehouse-card glass-panel" data-loc="Rolling Mill Area">
+                            <div class="wh-header">
+                                <h3>Rolling Mill Area</h3>
+                                <span class="wh-status badge success">Adequate</span>
+                            </div>
+                            <p class="wh-description">Transit staging area for intermediate billets, blooms, and slabs.</p>
+                            <div class="wh-progress-container">
+                                <div class="wh-progress-header">
+                                    <span>Mill Area Utilization</span>
+                                    <span class="wh-percentage" id="wh-S2-capacity">0%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill wh-S2-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="wh-stats">
+                                <div><span class="stat-num" id="wh-S2-items">0</span> <span class="stat-lbl">SKUs</span></div>
+                                <div><span class="stat-num" id="wh-S2-stock">0</span> <span class="stat-lbl">Tons</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 2: INVENTORY LIST -->
+                <section class="tab-content" id="view-inventory">
+                    <div class="welcome-header flex-header">
+                        <div>
+                            <h1>Material Inventory Control</h1>
+                            <p class="subtitle">Supervise stock levels, furnace thresholds, and storage yards</p>
+                        </div>
+                        <button class="btn btn-primary" id="open-add-modal-btn">
+                            <i data-lucide="plus-circle"></i>
+                            <span>Register New Material SKU</span>
+                        </button>
+                    </div>
+
+                    <!-- Filter Bar -->
+                    <div class="filter-bar glass-panel">
+                        <div class="search-input-wrapper">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="inventory-search" placeholder="Filter by Name, Billet, Yard...">
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="filter-category">
+                                <option value="">All Categories</option>
+                                <option value="Raw Materials">Raw Materials</option>
+                                <option value="Semi-Finished Goods">Semi-Finished Goods</option>
+                                <option value="Finished Products">Finished Products</option>
+                                <option value="Equipment & Spares">Equipment & Spares</option>
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="filter-location">
+                                <option value="">All Areas</option>
+                                <option value="Raw Material Yard">Raw Material Yard</option>
+                                <option value="Finished Goods Hub">Finished Goods Hub</option>
+                                <option value="Blast Furnace Yard">Blast Furnace Yard</option>
+                                <option value="Rolling Mill Area">Rolling Mill Area</option>
+                                <option value="Tooling Room">Tooling Room</option>
+                            </select>
+                        </div>
+                        <div class="select-wrapper">
+                            <select id="filter-status">
+                                <option value="">All Statuses</option>
+                                <option value="in-stock">Adequate Stock</option>
+                                <option value="low-stock">Replenish Warnings</option>
+                                <option value="out-of-stock">Depleted Stock</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <div class="table-container glass-panel">
+                        <table class="data-table" id="inventory-table-element">
+                            <thead>
+                                <tr>
+                                    <th data-sort="sku">SKU <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="name">Material Name <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="size">Size <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="quantity">Weight (Tons) <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="sell">Sell/Ton (₹) <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="category">Category <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="location">Yard Location <i data-lucide="chevrons-up-down"></i></th>
+                                    <th data-sort="minStock">Min Threshold <i data-lucide="chevrons-up-down"></i></th>
+                                    <th>Status</th>
+                                    <th class="actions-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventory-table-body">
+                                <!-- Dynamic rows inserted by JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="table-empty-state" id="table-empty-element">
+                            <i data-lucide="box-select" class="empty-icon"></i>
+                            <p>No material items match the current query filter.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 3: LOGISTICS OPERATIONS -->
+                <section class="tab-content" id="view-operations">
+                    <div class="welcome-header">
+                        <h1>Mill & Yard Operations</h1>
+                        <p class="subtitle">Record raw supplier deliveries (intake) and load dispatch outbounds (sales)</p>
+                    </div>
+
+                    <div class="operations-grid">
+                        <!-- Left Panel: Dispatch Shipment (Sales) -->
+                        <div class="operations-card glass-panel">
+                            <div class="panel-header border-bottom">
+                                <div class="header-icon-title">
+                                    <div class="op-icon-badge dispatch">
+                                        <i data-lucide="truck"></i>
+                                    </div>
+                                    <div>
+                                        <h2>Dispatch Product Load (Sales)</h2>
+                                        <p class="panel-sub">Ship finished coils or rebar rods to distributors/clients</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <form class="panel-form" id="dispatch-form">
+                                <div class="form-group">
+                                    <label for="dispatch-item-select">Select Material SKU</label>
+                                    <div class="select-wrapper">
+                                        <select id="dispatch-item-select" required>
+                                            <!-- Dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <div class="form-help" id="dispatch-stock-status">Available Stock: 0 Tons</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dispatch-qty">Weight to Dispatch (Tons)</label>
+                                    <input type="number" id="dispatch-qty" min="1" placeholder="Enter tonnage" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="dispatch-destination">Client / Consignee Location</label>
+                                    <input type="text" id="dispatch-destination" placeholder="Distributor Name or Construction Site" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-secondary btn-full">
+                                    <i data-lucide="navigation"></i>
+                                    <span>Confirm Dispatch Outbound</span>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Right Panel: Restock / Receive Goods -->
+                        <div class="operations-card glass-panel">
+                            <div class="panel-header border-bottom">
+                                <div class="header-icon-title">
+                                    <div class="op-icon-badge restock">
+                                        <i data-lucide="plus-circle"></i>
+                                    </div>
+                                    <div>
+                                        <h2>Supplier Material Intake</h2>
+                                        <p class="panel-sub">Add weight for raw ore, fuel coke, or equipment stock</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <form class="panel-form" id="restock-form">
+                                <div class="form-group">
+                                    <label for="restock-item-select">Select Material SKU</label>
+                                    <div class="select-wrapper">
+                                        <select id="restock-item-select" required>
+                                            <!-- Dynamically populated -->
+                                        </select>
+                                    </div>
+                                    <div class="form-help" id="restock-current-status">Current Stock: 0 Tons</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="restock-qty">Intake Weight (Tons)</label>
+                                    <input type="number" id="restock-qty" min="1" placeholder="Enter intake tonnage" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="restock-supplier">Supplier / Freight Carrier</label>
+                                    <input type="text" id="restock-supplier" placeholder="e.g. Mining Corp Unit 2, Freight Train Train-B" required>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-full">
+                                    <i data-lucide="package-plus"></i>
+                                    <span>Confirm Material Intake</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- VIEW 4: REPORTS & ANALYTICS -->
+                <section class="tab-content" id="view-reports">
+                    <div class="welcome-header flex-header">
+                        <div>
+                            <h1>Audits & Production Logs</h1>
+                            <p class="subtitle">Examine smelting asset records, sales invoices, and export stock sheets</p>
+                        </div>
+                        <button class="btn btn-outline" id="export-csv-btn">
+                            <i data-lucide="download"></i>
+                            <span>Export Stock Sheet CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- Stock Summary Sub-Grid -->
+                    <div class="reports-container glass-panel">
+                        <div class="reports-tabs-header">
+                            <button class="report-tab-btn active" data-report="sales">Outbound Invoice & Cargo Log</button>
+                            <button class="report-tab-btn" data-report="summary">Asset Weight Audits</button>
+                        </div>
+
+                        <!-- Report Panel 1: Sales / Dispatch Log -->
+                        <div class="report-tab-content active" id="report-sales-panel">
+                            <div class="table-container min-h">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Timestamp</th>
+                                            <th>SKU</th>
+                                            <th>Material Name</th>
+                                            <th>Category</th>
+                                            <th>Weight Shipped (t)</th>
+                                            <th>Price/Ton (₹)</th>
+                                            <th>Total Valuation (₹)</th>
+                                            <th>Destination</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sales-log-table-body">
+                                        <!-- Sales dynamically populated -->
+                                    </tbody>
+                                </table>
+                                <div class="table-empty-state" id="sales-log-empty">
+                                    <i data-lucide="scroll-text" class="empty-icon"></i>
+                                    <p>No dispatch shipments logged yet. Process invoices in the Operations tab.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Report Panel 2: Audits & Summary Text Area -->
+                        <div class="report-tab-content" id="report-summary-panel">
+                            <div class="summary-wrapper">
+                                <div class="summary-actions">
+                                    <h3>FerrumForge Facility Asset Audit</h3>
+                                    <button class="btn btn-sm btn-outline" id="refresh-summary-btn">
+                                        <i data-lucide="refresh-cw"></i>
+                                        <span>Re-Calculate Audit</span>
+                                    </button>
+                                </div>
+                                <div class="summary-box">
+                                    <pre id="audit-text-area">Generating audit sheet...</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: ADD / EDIT SKU -->
+    <div class="modal-backdrop" id="sku-modal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2 id="modal-title">Register New Factory Material</h2>
+                <button class="modal-close" id="modal-close-btn">&times;</button>
+            </div>
+            <form id="sku-form">
+                <input type="hidden" id="edit-sku-index" value="">
+                
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="sku-name">Material Name</label>
+                        <input type="text" id="sku-name" placeholder="e.g. Billets Steel 150x150" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="sku-category">Category</label>
+                        <div class="select-wrapper">
+                            <select id="sku-category" required>
+                                <option value="Raw Materials">Raw Materials</option>
+                                <option value="Semi-Finished Goods">Semi-Finished Goods</option>
+                                <option value="Finished Products">Finished Products</option>
+                                <option value="Equipment & Spares">Equipment & Spares</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-4">
+                        <label for="sku-qty">Initial Weight (Tons)</label>
+                        <input type="number" id="sku-qty" min="0" value="0" required>
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="sku-min-stock">Min Stock Warning (t)</label>
+                        <input type="number" id="sku-min-stock" min="0" value="50" required>
+                    </div>
+                    <div class="form-group col-4">
+                        <label for="sku-location">Storage Yard</label>
+                        <div class="select-wrapper">
+                            <select id="sku-location" required>
+                                <option value="Raw Material Yard">Raw Material Yard</option>
+                                <option value="Finished Goods Hub">Finished Goods Hub</option>
+                                <option value="Blast Furnace Yard">Blast Furnace Yard</option>
+                                <option value="Rolling Mill Area">Rolling Mill Area</option>
+                                <option value="Tooling Room">Tooling Room</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label for="sku-size">Size of Item</label>
+                        <input type="text" id="sku-size" placeholder="e.g. 12mm, 150x150, 2mm" required>
+                    </div>
+                    <div class="form-group col-6">
+                        <label for="sku-sell-price">Selling Price per Ton (₹)</label>
+                        <input type="number" step="0.01" id="sku-sell-price" min="0" placeholder="0.00" required>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="modal-submit-btn">Save Material</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification panel/dropdown -->
+    <div class="notification-panel glass-panel" id="notification-dropdown">
+        <div class="notif-header">
+            <h3>Active Replenish Warnings</h3>
+            <button class="btn-text-close" id="notif-close-btn">&times;</button>
+        </div>
+        <div class="notif-body" id="notif-list-body">
+            <!-- Warnings inserted here -->
+        </div>
+    </div>
+
+    <!-- Toast alerts -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Print Bill Template (Print-only) -->
+    <div class="print-bill-container" id="print-bill-template">
+        <div class="print-header">
+            <div class="print-logo">
+                <i data-lucide="anvil"></i>
+                <span>FerrumForge Industrial</span>
+            </div>
+            <div class="print-title">
+                <h1>CARGO DISPATCH BILL</h1>
+                <p>Delivery Order & Material Invoice</p>
+            </div>
+        </div>
+        <hr>
+        <div class="print-meta-grid">
+            <div>
+                <p><strong>Invoice No:</strong> <span id="pb-invoice-id"></span></p>
+                <p><strong>Issue Date:</strong> <span id="pb-date"></span></p>
+            </div>
+            <div>
+                <p><strong>Origin Yard:</strong> FerrumForge Foundry Hub</p>
+                <p><strong>Consignee Destination:</strong> <span id="pb-destination"></span></p>
+            </div>
+        </div>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th>Material SKU</th>
+                    <th>Item Description</th>
+                    <th>Size</th>
+                    <th>Category</th>
+                    <th>Weight Shipped</th>
+                    <th>Rate per Ton (₹)</th>
+                    <th>Total Charge (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="pb-sku"></td>
+                    <td id="pb-name"></td>
+                    <td id="pb-size"></td>
+                    <td id="pb-category"></td>
+                    <td id="pb-qty"></td>
+                    <td id="pb-price"></td>
+                    <td id="pb-total" style="font-weight: 700;"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="print-footer">
+            <div class="print-sign">
+                <p>___________________________</p>
+                <p>Forge Master Signature</p>
+            </div>
+            <div class="print-sign">
+                <p>___________________________</p>
+                <p>Consignee Receiver Signature</p>
+            </div>
+        </div>
+    </div>
+
+    </div> <!-- /#app-view -->
+
+    <!-- Core Javascript -->
+    <script src="app.js"></script>
+</body>
+</html>
