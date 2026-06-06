@@ -5,6 +5,8 @@ node_modules/
 .env
 .env.local
 
+# Data files (runtime database - keep structure but not live data)
+
 # Logs
 *.log
 logs/
